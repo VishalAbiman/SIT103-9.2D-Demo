@@ -1,48 +1,27 @@
-# SIT103 Task 9.2D - Database Form with Embedded SQL
+# SIT103 Task 9.2D - Live GitHub Pages Demo
 
-## Project Overview
-A web-based patient admission system for RSPCA Wildlife Hospital with form validation and SQLite database storage.
+## 🌐 Live Demo
+👉 **[Click here to view the live demo](https://yourusername.github.io/SIT103_9.2D/)**
 
-## Features
-- ✅ Form with client-side validation
-- ✅ Server-side validation in PHP
-- ✅ SQLite database storage
-- ✅ Patient ID format validation (RSPCA-YYYY-XXXXX)
-- ✅ Condition range validation (1-5)
-- ✅ Date validation (not in future)
-- ✅ Duplicate prevention
-- ✅ View all saved records
+## 📋 Project Overview
+This is a fully functional demonstration of Task 9.2D hosted on GitHub Pages. The demo simulates a patient admission system for RSPCA Wildlife Hospital with form validation and "database" functionality.
 
-## Files
-1. `index.php` - Patient admission form
-2. `insert.php` - Form processing and database insertion
-3. `config.php` - SQLite database connection
-4. `viewpatients.php` - View all saved patients
-5. `rspca.db` - SQLite database file (auto-created)
+## 🎯 Features Demonstrated
+- ✅ **Working Form** with real-time validation
+- ✅ **Patient ID validation** (RSPCA-YYYY-XXXXX format)
+- ✅ **Condition validation** (1-5 range)
+- ✅ **Date validation** (not in future)
+- ✅ **Database simulation** using localStorage
+- ✅ **View all saved records**
+- ✅ **Export functionality** (CSV download)
+- ✅ **Complete PHP/MySQL code** shown for assessment
+- ✅ **Responsive design** works on all devices
 
-## Setup Instructions
-1. Place all files in a web-accessible directory
-2. Ensure PHP has SQLite support
-3. Run: `php -S localhost:8000`
-4. Open: `http://localhost:8000/index.php`
+## 🔧 How It Works
+1. **Frontend**: HTML5 form with JavaScript validation
+2. **Storage**: Browser's localStorage simulates database
+3. **Validation**: Both client-side and simulated server-side
+4. **Data Persistence**: Saved between browser sessions
+5. **Export**: Download data as CSV file
 
-## Database Schema
-```sql
--- PATIENT table
-CREATE TABLE PATIENT (
-    PatientID TEXT PRIMARY KEY,
-    SpeciesID TEXT NOT NULL,
-    AdmissionDate TEXT NOT NULL,
-    ConditionOnArrival INTEGER CHECK (1-5),
-    CurrentStatus TEXT CHECK (Critical, Stable, Rehabilitating, Ready for Release),
-    CommonName TEXT,
-    Weight REAL,
-    Injuries TEXT,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- SPECIES table
-CREATE TABLE SPECIES (
-    SpeciesID TEXT PRIMARY KEY,
-    CommonName TEXT NOT NULL
-);
+## 📁 File Structure
