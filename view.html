@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Patients - RSPCA</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-list"></i> Patient Records</h1>
+            <h2>RSPCA Wildlife Hospital Database</h2>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Form
+            </a>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPatients">0</div>
+                <div class="stat-label">Total Patients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="criticalPatients">0</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayPatients">0</div>
+                <div class="stat-label">Admitted Today</div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <h3><i class="fas fa-table"></i> All Patient Records</h3>
+            
+            <div id="patientsTable">
+                <!-- Will be populated by JavaScript -->
+                <div class="empty-state">
+                    <i class="fas fa-database fa-3x"></i>
+                    <h4>No Patient Records Found</h4>
+                    <p>Add patients using the form to see them here.</p>
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Add First Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h4><i class="fas fa-download"></i> Export Options</h4>
+            <div class="button-group">
+                <button class="btn" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv"></i> Export as CSV
+                </button>
+                <button class="btn" onclick="printTable()">
+                    <i class="fas fa-print"></i> Print Table
+                </button>
+                <button class="btn btn-clear" onclick="clearAllData()">
+                    <i class="fas fa-trash"></i> Clear All Data
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data stored in browser's localStorage | Simulates database functionality</p>
+            <p>Full PHP/MySQL implementation available in code files</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPatients();
+            updateStats();
+        });
+
+        function loadPatients() {
+            const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+            const tableContainer = document.getElementById('patientsTable');
+            
+            if (patients.length === 0) {
+                return; // Keep empty state
+            }
+            
+            let html = `
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Species</th>
+                                <th>Admission Date</th>
+                                <th>Condition</th>
+                                <th>Status</th>
+                                <th>Common Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            patients.forEach((patient, index) => {
+                const speciesNames = {
+                    'Vombatus_ursinus': 'Common Wombat',
+                    'Cacatua_galerita': 'Sulphur-crested Cockatoo',
+                    'Trichosurus_vulpecula': 'Common Brushtail Possum',
+                    'Morelia_spilota': 'Carpet Python',
+                    'Ornithorhynchus_anatinus': 'Platypus'
+                };
+                
+                const speciesName = speciesNames[patient.species] || patient.species;
+                
+                html += `
+                    <tr>
+                        <td><strong>${patient.patientId}</strong></td>
+                        <td>${speciesName}</td>
+                        <td>${patient.admissionDate}</td>
+                        <td>
+                            <span class="condition-badge condition-${patient.condition}">
+                                ${patient.condition}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${patient.status.toLowerCase()}">
+                                ${patient.status}
+                            </span>
+                        </td>
+                        <td>${patient.commonName || '-'}</td>
+                        <td>
+                            <button class="btn-small" onclick="viewPatient(${index})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn-small btn-danger" onclick="deletePatient(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+            
+            html += `</tbody></table></div>`;
+            tableContainer.innerHTML = html;
+        }
+
+        function updateStats() {
+            const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            
+            const total = patients.length;
+            const critical = patients.filter(p => p.status === 'Critical').length;
+            const todayCount = patients.filter(p => p.admissionDate === today).length;
+            
+            document.getElementById('totalPatients').textContent = total;
+            document.getElementById('criticalPatients').textContent = critical;
+            document.getElementById('todayPatients').textContent = todayCount;
+        }
+
+        function viewPatient(index) {
+            const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+            const patient = patients[index];
+            
+            alert(`Patient Details:\n\n` +
+                  `ID: ${patient.patientId}\n` +
+                  `Species: ${patient.species}\n` +
+                  `Admission Date: ${patient.admissionDate}\n` +
+                  `Condition: ${patient.condition}/5\n` +
+                  `Status: ${patient.status}\n` +
+                  `Common Name: ${patient.commonName || 'Not specified'}\n` +
+                  `Injuries: ${patient.injuries || 'None recorded'}`);
+        }
+
+        function deletePatient(index) {
+            if (confirm('Delete this patient record?')) {
+                const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+                patients.splice(index, 1);
+                localStorage.setItem('patients', JSON.stringify(patients));
+                loadPatients();
+                updateStats();
+                
+                // Show message
+                const message = document.createElement('div');
+                message.className = 'message success';
+                message.innerHTML = '<i class="fas fa-check"></i> Patient record deleted';
+                document.querySelector('.container').prepend(message);
+                
+                setTimeout(() => message.remove(), 3000);
+            }
+        }
+
+        function exportToCSV() {
+            const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+            if (patients.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const speciesNames = {
+                'Vombatus_ursinus': 'Common Wombat',
+                'Cacatua_galerita': 'Sulphur-crested Cockatoo',
+                'Trichosurus_vulpecula': 'Common Brushtail Possum',
+                'Morelia_spilota': 'Carpet Python',
+                'Ornithorhynchus_anatinus': 'Platypus'
+            };
+            
+            let csv = 'PatientID,Species,AdmissionDate,Condition,Status,CommonName,Injuries\n';
+            
+            patients.forEach(patient => {
+                const speciesName = speciesNames[patient.species] || patient.species;
+                const commonName = patient.commonName || '';
+                const injuries = (patient.injuries || '').replace(/"/g, '""');
+                
+                csv += `"${patient.patientId}","${speciesName}","${patient.admissionDate}",` +
+                       `"${patient.condition}","${patient.status}","${commonName}","${injuries}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'rspca_patients.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            alert(`Exported ${patients.length} patient records to CSV`);
+        }
+
+        function printTable() {
+            window.print();
+        }
+
+        function clearAllData() {
+            if (confirm('Clear ALL patient data? This cannot be undone.')) {
+                localStorage.removeItem('patients');
+                loadPatients();
+                updateStats();
+                
+                const message = document.createElement('div');
+                message.className = 'message success';
+                message.innerHTML = '<i class="fas fa-check"></i> All patient data cleared';
+                document.querySelector('.container').prepend(message);
+                
+                setTimeout(() => message.remove(), 3000);
+            }
+        }
+    </script>
+</body>
+</html>
