@@ -5,7 +5,7 @@
 A complete web-based patient admission system for RSPCA Victoria Wildlife Hospital with embedded SQL, form validation, and database operations.
 
 **🌐 Live Demo:** [GitHub Pages Link Here]  
-**📁 Repository:** [GitHub Repository Link Here]
+**📁 Repository:** [https://vishalabiman.github.io/SIT103-9.2D-Demo/index.html]
 
 ## 🎯 Features Implemented
 - ✅ **Form Validation** - Client & server-side validation
