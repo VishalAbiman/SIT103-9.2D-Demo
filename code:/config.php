@@ -1,47 +1,62 @@
 <?php
-// config.php - Database connection
+// config.php - SQLite Database Connection
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$host = "localhost";
-$user = "root";
-$password = "";  // Default MySQL on Mac has no password
-$database = "rspca_wildlife_hospital";
+// SQLite database file
+$dbFile = 'rspca.db';
 
-// Try different connection methods
-$conn = @new mysqli($host, $user, $password, $database);
-
-// If connection fails, try to create database
-if ($conn->connect_error) {
-    echo "<p style='color:orange'>⚠️ Database '$database' not found. Attempting to create it...</p>";
-    
-    // Connect without database first
-    $temp_conn = new mysqli($host, $user, $password);
-    
-    if (!$temp_conn->connect_error) {
-        // Create database
-        $temp_conn->query("CREATE DATABASE IF NOT EXISTS $database");
-        echo "<p style='color:green'>✅ Database created successfully</p>";
-        $temp_conn->close();
-        
-        // Try connecting again
-        $conn = new mysqli($host, $user, $password, $database);
-        
-        if ($conn->connect_error) {
-            die("<p style='color:red'>❌ Final connection failed: " . $conn->connect_error . "</p>");
-        }
-    } else {
-        die("<p style='color:red'>❌ Could not connect to MySQL. Please check if MySQL is running.<br>
-            Try: <code>brew services start mysql</code> in Terminal</p>");
-    }
+// Check if database file exists, create if not
+if (!file_exists($dbFile)) {
+    touch($dbFile);
+    chmod($dbFile, 0644); // Set permissions
 }
 
-// Optional: Set charset to UTF-8
-$conn->set_charset("utf8mb4");
+// Connect to SQLite database
+try {
+    $db = new SQLite3($dbFile, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
+    $db->busyTimeout(5000); // Set timeout
+    
+    // Enable foreign keys
+    $db->exec('PRAGMA foreign_keys = ON');
+    
+    // Set encoding
+    $db->exec('PRAGMA encoding = "UTF-8"');
+    
+} catch (Exception $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
 
-// For debugging (remove in production)
-echo "<!-- ✅ Database connection successful -->";
+// Create tables if they don't exist
+$db->exec("CREATE TABLE IF NOT EXISTS SPECIES (
+    SpeciesID TEXT PRIMARY KEY,
+    CommonName TEXT NOT NULL
+)");
 
-// If you want to hide the success message, remove the echo above
-// Or use: // echo "<!-- ✅ Database connection successful -->";
+$db->exec("CREATE TABLE IF NOT EXISTS PATIENT (
+    PatientID TEXT PRIMARY KEY,
+    SpeciesID TEXT NOT NULL,
+    AdmissionDate TEXT NOT NULL,
+    ConditionOnArrival INTEGER CHECK (ConditionOnArrival BETWEEN 1 AND 5),
+    CurrentStatus TEXT NOT NULL CHECK (CurrentStatus IN ('Critical', 'Stable', 'Rehabilitating', 'Ready for Release')),
+    CommonName TEXT,
+    Weight REAL,
+    Injuries TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (SpeciesID) REFERENCES SPECIES(SpeciesID)
+)");
+
+// Insert sample species if table is empty
+$result = $db->querySingle("SELECT COUNT(*) as count FROM SPECIES");
+if ($result == 0) {
+    $db->exec("INSERT INTO SPECIES VALUES 
+        ('Vombatus_ursinus', 'Common Wombat'),
+        ('Cacatua_galerita', 'Sulphur-crested Cockatoo'),
+        ('Trichosurus_vulpecula', 'Common Brushtail Possum'),
+        ('Morelia_spilota', 'Carpet Python'),
+        ('Ornithorhynchus_anatinus', 'Platypus')");
+}
+
+// For backward compatibility with your index.php
+$conn = $db; // Alias $db as $conn for your existing code
 ?>
