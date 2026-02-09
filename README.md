@@ -1,44 +1,48 @@
 # SIT103 Task 9.2D - Database Form with Embedded SQL
 
-## Live Demo
-👉 [View Live Demo](https://yourusername.github.io/SIT103-9.2D-Demo/)
-
 ## Project Overview
-This project demonstrates a web form with embedded SQL for inserting patient records into the RSPCA Wildlife Hospital database.
+A web-based patient admission system for RSPCA Wildlife Hospital with form validation and SQLite database storage.
 
-## Features Implemented
-- ✅ Form validation (client & server side)
+## Features
+- ✅ Form with client-side validation
+- ✅ Server-side validation in PHP
+- ✅ SQLite database storage
 - ✅ Patient ID format validation (RSPCA-YYYY-XXXXX)
 - ✅ Condition range validation (1-5)
-- ✅ SQL INSERT with error handling
-- ✅ User feedback messages
+- ✅ Date validation (not in future)
+- ✅ Duplicate prevention
+- ✅ View all saved records
 
-## Technologies Used
-- HTML5, CSS3, JavaScript
-- PHP (server-side processing)
-- MySQL (database)
-- GitHub Pages (hosting)
+## Files
+1. `index.php` - Patient admission form
+2. `insert.php` - Form processing and database insertion
+3. `config.php` - SQLite database connection
+4. `viewpatients.php` - View all saved patients
+5. `rspca.db` - SQLite database file (auto-created)
 
-## Code Structure
-- `index.html` - Interactive demonstration
-- `code/` - Actual PHP implementation files
-  - `config.php` - Database connection
-  - `index.php` - HTML form with PHP
-  - `insert.php` - Validation and SQL insertion
-
-## Validation Rules
-1. Patient ID must match: `RSPCA-YYYY-XXXXX`
-2. Condition must be between 1 and 5
-3. Admission date cannot be in the future
-4. All required fields must be filled
-5. Duplicate Patient IDs are prevented
+## Setup Instructions
+1. Place all files in a web-accessible directory
+2. Ensure PHP has SQLite support
+3. Run: `php -S localhost:8000`
+4. Open: `http://localhost:8000/index.php`
 
 ## Database Schema
 ```sql
+-- PATIENT table
 CREATE TABLE PATIENT (
-    PatientID VARCHAR(20) PRIMARY KEY,
-    SpeciesID VARCHAR(100) NOT NULL,
-    AdmissionDate DATE NOT NULL,
-    ConditionOnArrival INT CHECK (1-5),
-    CurrentStatus VARCHAR(50) NOT NULL
+    PatientID TEXT PRIMARY KEY,
+    SpeciesID TEXT NOT NULL,
+    AdmissionDate TEXT NOT NULL,
+    ConditionOnArrival INTEGER CHECK (1-5),
+    CurrentStatus TEXT CHECK (Critical, Stable, Rehabilitating, Ready for Release),
+    CommonName TEXT,
+    Weight REAL,
+    Injuries TEXT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SPECIES table
+CREATE TABLE SPECIES (
+    SpeciesID TEXT PRIMARY KEY,
+    CommonName TEXT NOT NULL
 );
