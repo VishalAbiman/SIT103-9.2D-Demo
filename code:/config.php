@@ -1,38 +1,35 @@
 <?php
-// config.php - SQLite Database Connection
+// config.php - SQLite Database Connection for RSPCA Wildlife Hospital
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// SQLite database file
-$dbFile = 'rspca.db';
+// SQLite database file location (in main folder)
+$dbFile = '../rspca.db';
 
-// Check if database file exists, create if not
+// Check if database file exists in main folder, create if not
 if (!file_exists($dbFile)) {
     touch($dbFile);
-    chmod($dbFile, 0644); // Set permissions
+    chmod($dbFile, 0644);
+    echo "<!-- Database file created: $dbFile -->";
 }
 
 // Connect to SQLite database
 try {
     $db = new SQLite3($dbFile, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
-    $db->busyTimeout(5000); // Set timeout
-    
-    // Enable foreign keys
+    $db->busyTimeout(5000);
     $db->exec('PRAGMA foreign_keys = ON');
-    
-    // Set encoding
     $db->exec('PRAGMA encoding = "UTF-8"');
     
 } catch (Exception $e) {
-    die("Database connection failed: " . $e->getMessage());
+    die("<div style='color:red; padding:20px; border:2px solid red; margin:20px;'>
+        <h3>❌ Database Connection Failed</h3>
+        <p><strong>Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>
+        <p><strong>Solution:</strong> Ensure PHP has SQLite support enabled.</p>
+        <p>Check: <code>php -m | grep sqlite</code></p>
+        </div>");
 }
 
-// Create tables if they don't exist
-$db->exec("CREATE TABLE IF NOT EXISTS SPECIES (
-    SpeciesID TEXT PRIMARY KEY,
-    CommonName TEXT NOT NULL
-)");
-
+// Create PATIENT table if it doesn't exist
 $db->exec("CREATE TABLE IF NOT EXISTS PATIENT (
     PatientID TEXT PRIMARY KEY,
     SpeciesID TEXT NOT NULL,
@@ -42,21 +39,34 @@ $db->exec("CREATE TABLE IF NOT EXISTS PATIENT (
     CommonName TEXT,
     Weight REAL,
     Injuries TEXT,
-    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (SpeciesID) REFERENCES SPECIES(SpeciesID)
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+// Create SPECIES table if it doesn't exist
+$db->exec("CREATE TABLE IF NOT EXISTS SPECIES (
+    SpeciesID TEXT PRIMARY KEY,
+    CommonName TEXT NOT NULL
 )");
 
 // Insert sample species if table is empty
-$result = $db->querySingle("SELECT COUNT(*) as count FROM SPECIES");
-if ($result == 0) {
-    $db->exec("INSERT INTO SPECIES VALUES 
+$speciesCount = $db->querySingle("SELECT COUNT(*) as count FROM SPECIES");
+if ($speciesCount == 0) {
+    $db->exec("INSERT INTO SPECIES (SpeciesID, CommonName) VALUES 
         ('Vombatus_ursinus', 'Common Wombat'),
         ('Cacatua_galerita', 'Sulphur-crested Cockatoo'),
         ('Trichosurus_vulpecula', 'Common Brushtail Possum'),
         ('Morelia_spilota', 'Carpet Python'),
         ('Ornithorhynchus_anatinus', 'Platypus')");
+    echo "<!-- Sample species data inserted -->";
 }
 
-// For backward compatibility with your index.php
-$conn = $db; // Alias $db as $conn for your existing code
+// For backward compatibility with existing code
+$conn = $db;
+
+// Optional: Test connection
+if (!$db) {
+    die("<!-- Database connection failed -->");
+} else {
+    echo "<!-- ✅ Database connected successfully -->";
+}
 ?>
