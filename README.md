@@ -30,11 +30,6 @@ SIT103_9.2D/
 ├── demo.js             # JavaScript database simulation
 ├── style.css           # Complete styling
 ├── README.md           # Documentation
-└── code/               # Complete PHP/SQLite implementation
-    ├── index.php       # PHP patient form
-    ├── insert.php      # Form processing & validation
-    ├── config.php      # Database connection (SQLite)
-    └── viewpatients.php # View all records
 ```
 
 ## 🚀 Quick Start
